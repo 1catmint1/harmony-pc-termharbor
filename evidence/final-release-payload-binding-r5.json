@@ -1,0 +1,27 @@
+{
+  "bundle": "com.termharbor.track1",
+  "version": "1.0.1",
+  "usbRun": "r4",
+  "equalPayloadFiles": 8,
+  "moduleAbcNativeLibraryResourcesEqual": true,
+  "appInnerHapPayloadEqual": true,
+  "releaseAppSha256": "484bb884b76593a3e1ca1dd782738157569290bdd4a8553f6628e48c4490bf0a",
+  "usbHapSha256": "35a1d6f75807731c80dba18c2c485191e01668760f31a865b3b90e7a98fd81bf",
+  "requestedPermissions": [
+    "ohos.permission.INTERNET"
+  ],
+  "deviceTypes": [
+    "2in1"
+  ],
+  "payload": {
+    "ets/modules.abc": "af35054beed67a1111de0254b0ce17457902d39ef9dfac64fcf641920d905f9e",
+    "libs/arm64-v8a/libc++_shared.so": "cf2ea887af365557f4ad258c62631a4f92f902b4b79203a2185dba10efe19e62",
+    "libs/arm64-v8a/libteraterm_ohos.so": "d503fad99f6da95156682899c845225eb2b8eb2892785929bf9bdcfadd6e8af1",
+    "module.json": "df9aa9675faa65701fb66c75c7fb910b68aaf41025bd449e22b18873a2ee704a",
+    "resources.index": "8e31903124dfb79fa822facc8bd598e8d755a3a2e00083a91c4e970cb84454b2",
+    "resources/base/media/app_icon.png": "c57dce75ff017855723d261db79c6c65ad64e6d47a9bb2985c3ec275b5b1d867",
+    "resources/base/profile/main_pages.json": "93846868ae31b5507d3e0675b3a364dab27a9e2ea7edb2a39c9a2bb70846d1f6",
+    "resources/rawfile/THIRD-PARTY-NOTICES.txt": "7f85a868392840944d142c8921aefffc53d6fa3d3a5f3128c7deba5d22d51391"
+  },
+  "at": "2026-10-16T11:28:44.518846+00:00"
+}

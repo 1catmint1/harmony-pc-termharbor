@@ -1,0 +1,8 @@
+{
+  "product": "TermHarbor",
+  "upstreamRepository": "https://atomgit.com/OpenHarmonyPCDeveloper/ohso_teraterm",
+  "upstreamCommit": "4d50343a767fd20fab5cbf1e0cd13aa4fde6f803",
+  "sourceSelection": "ArkUI application, portable terminal/native source, tests, build configuration and complete license notices; without build caches, signing or runtime binaries",
+  "history": "Current-source snapshot; upstream attribution preserved",
+  "at": "2026-10-16T11:29:58.476835+00:00"
+}

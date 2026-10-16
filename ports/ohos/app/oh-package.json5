@@ -1,0 +1,10 @@
+{
+  "modelVersion": "5.1.0",
+  "name": "teraterm-ohos-pc",
+  "version": "0.1.0",
+  "description": "HarmonyOS PC port seed for Tera Term",
+  "author": "TeraTermProject",
+  "license": "BSD-3-Clause",
+  "dependencies": {},
+  "devDependencies": {}
+}

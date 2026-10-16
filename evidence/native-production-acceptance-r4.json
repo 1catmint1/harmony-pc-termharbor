@@ -1,0 +1,19 @@
+{
+  "product": "TermHarbor",
+  "bundle": "com.termharbor.track1",
+  "run": "r4",
+  "hapSha256": "35a1d6f75807731c80dba18c2c485191e01668760f31a865b3b90e7a98fd81bf",
+  "sameBootPidUidBound": true,
+  "tcpFragmentedUtf8AndWideCells": true,
+  "tcpRoundtrip": true,
+  "sshAuthenticatedShellRoundtrip": true,
+  "newHostKeyTrustedStatus": true,
+  "privacyAndFullNoticesVisible": true,
+  "windowNormalAndMaximizedObserved": true,
+  "hostUtf8Cases": 24,
+  "hostWideCellCases": 12,
+  "upstreamHostProgramsPassed": 3,
+  "directNativeStandaloneExecution": "r1 denied126; not passed",
+  "reviewSubmitted": false,
+  "at": "2026-10-16T11:29:19.269809+00:00"
+}

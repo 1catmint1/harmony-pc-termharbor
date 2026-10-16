@@ -1,0 +1,12 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "TermHarbor"
+    },
+    {
+      "name": "entry_desc",
+      "value": "Tera Term terminal for HarmonyOS PC"
+    }
+  ]
+}

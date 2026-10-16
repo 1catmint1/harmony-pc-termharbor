@@ -1,0 +1,14 @@
+[
+  {
+    "file": "EastAsianWidth.txt",
+    "url": "https://www.unicode.org/Public/16.0.0/ucd/EastAsianWidth.txt",
+    "sha256": "43adc76c0686a42cb370764eb8cfe2b2a45b10b855e5572a2db4a0eecce15d5b",
+    "bytes": 199042
+  },
+  {
+    "file": "LICENSE.txt",
+    "url": "https://www.unicode.org/license.txt",
+    "sha256": "e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96",
+    "bytes": 1995
+  }
+]

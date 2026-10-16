@@ -1,0 +1,8 @@
+{
+  "name": "entry",
+  "version": "0.1.0",
+  "description": "Tera Term HarmonyOS PC entry module",
+  "author": "TeraTermProject",
+  "license": "BSD-3-Clause",
+  "dependencies": {}
+}
