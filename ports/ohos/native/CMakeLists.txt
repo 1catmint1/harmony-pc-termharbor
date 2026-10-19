@@ -89,6 +89,7 @@ endif()
 if(TT_OHOS_BUILD_NAPI)
   add_library(teraterm_ohos SHARED
     src/tt_ohos_napi.cpp
+    src/local_experience.cpp
   )
 
   target_link_libraries(teraterm_ohos
@@ -96,6 +97,20 @@ if(TT_OHOS_BUILD_NAPI)
       teraterm_ohos_core
   )
 
+  if(NOT DEFINED ENV{TT_OHOS_REVIEW_RUNTIME_ROOT})
+    message(FATAL_ERROR "Set TT_OHOS_REVIEW_RUNTIME_ROOT to the pinned local-experience runtime")
+  endif()
+  target_link_libraries(teraterm_ohos PRIVATE hilog_ndk.z)
+  target_compile_definitions(teraterm_ohos PRIVATE WITH_SERVER)
+  set(TT_REVIEW_RUNTIME "$ENV{TT_OHOS_REVIEW_RUNTIME_ROOT}")
+  target_include_directories(teraterm_ohos PRIVATE "${TT_REVIEW_RUNTIME}/include")
+  target_link_libraries(teraterm_ohos PRIVATE
+    "${TT_REVIEW_RUNTIME}/lib/libssh.a"
+    "${TT_REVIEW_RUNTIME}/lib/libmbedtls.a"
+    "${TT_REVIEW_RUNTIME}/lib/libmbedx509.a"
+    "${TT_REVIEW_RUNTIME}/lib/libmbedcrypto.a"
+    "${TT_REVIEW_RUNTIME}/lib/libeverest.a"
+    "${TT_REVIEW_RUNTIME}/lib/libp256m.a")
   find_library(ACE_NAPI_LIB ace_napi.z)
   if(NOT ACE_NAPI_LIB)
     message(FATAL_ERROR "ace_napi.z was not found. Build this target with the HarmonyOS native toolchain.")

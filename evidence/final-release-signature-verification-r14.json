@@ -1,0 +1,27 @@
+{
+  "bundle": "com.termharbor.track1",
+  "run": "r14",
+  "type": "release",
+  "signatureVerified": true,
+  "targetIncluded": false,
+  "noDeviceBinding": true,
+  "restrictedAclCount": 0,
+  "hapSha256": "3d3c76ea4bb09af182163593d0dc56d721c5a15d91a652ee0e9ee423d9c0815b",
+  "artifacts": {
+    "hap": {
+      "sha256": "3d3c76ea4bb09af182163593d0dc56d721c5a15d91a652ee0e9ee423d9c0815b",
+      "bytes": 3877609,
+      "signatureVerified": true,
+      "profileVerified": true
+    },
+    "app": {
+      "sha256": "68abe449b9f13856584f26a550210555b16907339890c65a369a41ad41e7961e",
+      "bytes": 1585414,
+      "signatureVerified": true,
+      "profileVerified": true
+    }
+  },
+  "createdAt": "2026-10-19T10:29:16.699Z",
+  "targetExecuted": false,
+  "appGallerySubmitted": false
+}

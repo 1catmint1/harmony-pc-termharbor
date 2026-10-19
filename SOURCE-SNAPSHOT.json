@@ -1,8 +1,9 @@
 {
   "product": "TermHarbor",
+  "version": "1.0.2",
   "upstreamRepository": "https://atomgit.com/OpenHarmonyPCDeveloper/ohso_teraterm",
   "upstreamCommit": "4d50343a767fd20fab5cbf1e0cd13aa4fde6f803",
-  "sourceSelection": "ArkUI application, portable terminal/native source, tests, build configuration and complete license notices; without build caches, signing or runtime binaries",
-  "history": "Current-source snapshot; upstream attribution preserved",
-  "at": "2026-10-16T11:29:58.476835+00:00"
+  "correspondingRuntimeSources": "third_party/runtime-sources/sources.json",
+  "buildScript": "tools/build-local-runtime.ps1",
+  "at": "2026-10-19T10:29:17.057802+00:00"
 }

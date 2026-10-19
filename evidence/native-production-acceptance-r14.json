@@ -1,0 +1,44 @@
+{
+  "product": "TermHarbor",
+  "bundle": "com.termharbor.track1",
+  "version": "1.0.2",
+  "run": "r14",
+  "complete": true,
+  "scope": "Actual C++/ArkTS development-signed release-mode app on the bound USB PC",
+  "checks": {
+    "tcpRoundtrip": true,
+    "sshAuthenticatedShellRoundtrip": true,
+    "scpCompletionAcknowledged": true,
+    "sftpBidirectionalControls": true,
+    "singleLineCtrlA": true,
+    "textAreaCtrlA": true,
+    "terminalCtrlA": true,
+    "sshForwardAfterIdle": true,
+    "privacyAccess": true,
+    "licenseAccess": true,
+    "firstStopResponsive": true,
+    "restartAndSecondStopResponsive": true,
+    "ownedProcessesReleased": true
+  },
+  "observedServerCounters": {
+    "tcpEchoes": 2,
+    "sshLogins": 6,
+    "scpAcknowledgedTransfers": 2,
+    "sftpReadWriteRequests": 2
+  },
+  "transferSampleBytes": 106,
+  "hostKeyboardCases": 15,
+  "hostScpCompletionCases": 8,
+  "hapSha256": "15a09408f0aa91bc563c717edc64dc052f4ff469990c9d147dac953c8ffd32e0",
+  "sameBootPidUidBound": true,
+  "sourceHashes": {
+    "ports/ohos/app/entry/src/main/ets/pages/Index.ets": "b2a7b879ef086a3f057d630e2383034403d027da3249a2c8f562a1dfd1f49589",
+    "ports/ohos/native/src/local_experience.cpp": "e9d1eef3e80ced9b99aba2df1944e989fd58dbbacfd8079a8f3ae88eff8c3e15",
+    "ports/ohos/native/src/ssh_transport_libssh2.cpp": "8006595601f3235430ee4eb1546b6a20eeafce83da5737ec1ca88e7eab4a7d45",
+    "ports/ohos/native/include/scp_completion.h": "255a8d00d39a00725e6e953f87ac65aed1df415f112f7fb3da2df4b821ffcc4e"
+  },
+  "stoppedFixture": "All local experience listeners and memory files; two stop cycles were followed by responsive UI",
+  "processesReleased": true,
+  "previousCandidate": "r13 stop-key ownership defect was repaired; prior evidence remains separate",
+  "at": "2026-10-19T10:28:11.971103+00:00"
+}

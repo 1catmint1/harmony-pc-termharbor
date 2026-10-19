@@ -1,0 +1,9 @@
+{
+  "skipped": 0,
+  "resultText": "SCP completion: 8 passed, 0 skipped",
+  "headerSha256": "255a8d00d39a00725e6e953f87ac65aed1df415f112f7fb3da2df4b821ffcc4e",
+  "exitCode": 0,
+  "assertionsEnabled": true,
+  "priorRetry": "An earlier standalone invocation lacked the MSYS runtime DLL directory; it failed before producing test output. Correct PATH is used here.",
+  "suite": "Production SCP completion helper"
+}

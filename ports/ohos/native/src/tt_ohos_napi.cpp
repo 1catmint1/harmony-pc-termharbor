@@ -1,3 +1,4 @@
+#include "local_experience.h"
 #include "profile_importer.h"
 #include "known_hosts_store.h"
 #include "macro_runner.h"
@@ -1323,6 +1324,7 @@ napi_value UpdateKnownHosts(napi_env env, napi_callback_info info) {
 }
 
 napi_value Init(napi_env env, napi_value exports) {
+  RegisterLocalExperience(env, exports);
   napi_property_descriptor descriptors[] = {
       {"createSession", nullptr, CreateSession, nullptr, nullptr, nullptr, napi_default, nullptr},
       {"writeSession", nullptr, WriteSession, nullptr, nullptr, nullptr, napi_default, nullptr},

@@ -1,0 +1,70 @@
+{
+  "suite": "Production ArkTS keyboard methods",
+  "total": 15,
+  "passed": 15,
+  "skipped": 0,
+  "cases": [
+    {
+      "name": "input Ctrl+A selects the complete UTF-16 string",
+      "pass": true
+    },
+    {
+      "name": "multiline Ctrl+A covers all lines",
+      "pass": true
+    },
+    {
+      "name": "plain A remains normal text input",
+      "pass": true
+    },
+    {
+      "name": "key-up does not consume Ctrl+A",
+      "pass": true
+    },
+    {
+      "name": "left Control fallback and release",
+      "pass": true
+    },
+    {
+      "name": "right Control fallback and focus reset",
+      "pass": true
+    },
+    {
+      "name": "handleTerminalKeyEvent Ctrl+A selects history without sending SOH",
+      "pass": true
+    },
+    {
+      "name": "handleTerminalKeyEvent retains Ctrl+C interrupt when no selection",
+      "pass": true
+    },
+    {
+      "name": "handleTerminalKeyEvent Ctrl+C copies an existing selection",
+      "pass": true
+    },
+    {
+      "name": "handleTerminalKeyEvent Ctrl+V invokes paste",
+      "pass": true
+    },
+    {
+      "name": "handleTerminalCaptureKeyEvent Ctrl+A selects history without sending SOH",
+      "pass": true
+    },
+    {
+      "name": "handleTerminalCaptureKeyEvent retains Ctrl+C interrupt when no selection",
+      "pass": true
+    },
+    {
+      "name": "handleTerminalCaptureKeyEvent Ctrl+C copies an existing selection",
+      "pass": true
+    },
+    {
+      "name": "handleTerminalCaptureKeyEvent Ctrl+V invokes paste",
+      "pass": true
+    },
+    {
+      "name": "empty terminal output avoids invalid selection bounds",
+      "pass": true
+    }
+  ],
+  "sourceSha256": "b2a7b879ef086a3f057d630e2383034403d027da3249a2c8f562a1dfd1f49589",
+  "scope": "host behavior; native input routing requires USB verification"
+}

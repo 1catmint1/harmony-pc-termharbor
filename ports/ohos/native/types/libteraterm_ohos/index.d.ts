@@ -215,3 +215,22 @@ export function updateKnownHosts(
   keyBase64: string,
   comment?: string,
 ): string;
+
+export interface LocalExperienceInfo {
+  scpTransfers: number;
+  sftpRequests: number;
+  host: string;
+  username: string;
+  password: string;
+  remotePath: string;
+  tcpPort: number;
+  sshPort: number;
+  tcpEchoes: number;
+  sshLogins: number;
+  fileReads: number;
+  fileWrites: number;
+}
+
+export function startLocalExperience(): LocalExperienceInfo;
+export function stopLocalExperience(): LocalExperienceInfo;
+export function localExperienceStatus(): LocalExperienceInfo;

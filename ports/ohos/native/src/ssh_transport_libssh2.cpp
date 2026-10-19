@@ -1,3 +1,4 @@
+#include "scp_completion.h"
 #include "ssh_transport.h"
 
 #include "posix_socket_connector.h"
@@ -181,7 +182,7 @@ bool RunSshLoop(int fd,
     }
     if (result != LIBSSH2_ERROR_EAGAIN) {
       if (error != nullptr) {
-        *error = SessionLastError(session, action);
+        *error = std::string(action) + ": " + SessionLastError(session, action);
       }
       return false;
     }
@@ -1067,6 +1068,13 @@ SshFileTransferResult UploadScpFileDirect(const SshFileTransferOptions& options)
     }
   }
 
+  if (!CompleteScpFile(true,
+      [&](char* byte,bool writing)->long { return writing ? libssh2_channel_write(channel,byte,1) : libssh2_channel_read(channel,byte,1); },
+      [&](){return WaitSocket(connection.fd,connection.session,options.connection.timeout_ms,&result.error);},
+      LIBSSH2_ERROR_EAGAIN,&result.error)) {
+    libssh2_channel_free(channel);
+    return result;
+  }
   libssh2_channel_send_eof(channel);
   libssh2_channel_wait_eof(channel);
   libssh2_channel_wait_closed(channel);
@@ -1146,6 +1154,13 @@ SshFileTransferResult DownloadScpFileDirect(const SshFileTransferOptions& option
   }
 
   output.close();
+  if (!CompleteScpFile(false,
+      [&](char* byte,bool writing)->long { return writing ? libssh2_channel_write(channel,byte,1) : libssh2_channel_read(channel,byte,1); },
+      [&](){return WaitSocket(connection.fd,connection.session,options.connection.timeout_ms,&result.error);},
+      LIBSSH2_ERROR_EAGAIN,&result.error)) {
+    libssh2_channel_free(channel);
+    return result;
+  }
   libssh2_channel_send_eof(channel);
   libssh2_channel_wait_eof(channel);
   libssh2_channel_wait_closed(channel);

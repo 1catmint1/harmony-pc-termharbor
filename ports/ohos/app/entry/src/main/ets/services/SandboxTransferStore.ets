@@ -2,6 +2,15 @@ import fs from '@ohos.file.fs';
 import type common from '@ohos.app.ability.common';
 
 export class SandboxTransferStore {
+  static localExperienceUpload(context: common.Context): string {
+    const path = `${context.filesDir}/local-experience-upload.txt`;
+    if (!fs.accessSync(path)) {
+      const file = fs.openSync(path, fs.OpenMode.CREATE | fs.OpenMode.READ_WRITE);
+      try { fs.writeSync(file.fd, 'TermHarbor 本机文件传输体验\n'); }
+      finally { fs.closeSync(file); }
+    }
+    return path;
+  }
   static downloadPath(context: common.Context, remotePath: string): string {
     const dir = `${context.filesDir}/ssh_downloads`;
     SandboxTransferStore.ensureDirectory(dir);

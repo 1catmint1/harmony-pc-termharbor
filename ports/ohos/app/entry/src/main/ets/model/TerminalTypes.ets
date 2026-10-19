@@ -1,3 +1,19 @@
+export interface LocalExperienceInfo {
+  scpTransfers: number;
+  sftpRequests: number;
+  error: string;
+  host: string;
+  username: string;
+  password: string;
+  remotePath: string;
+  tcpPort: number;
+  sshPort: number;
+  tcpEchoes: number;
+  sshLogins: number;
+  fileReads: number;
+  fileWrites: number;
+}
+
 export type ProtocolMode = 'tcp' | 'telnet' | 'ssh' | 'serial';
 export type TerminalColorTheme = 'dark' | 'light' | 'classic';
 

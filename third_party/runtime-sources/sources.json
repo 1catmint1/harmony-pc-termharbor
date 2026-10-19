@@ -1,0 +1,17 @@
+[
+  {
+    "file": "mbedtls-3.6.7.tar.bz2",
+    "officialSource": "https://github.com/Mbed-TLS/mbedtls/releases/tag/mbedtls-3.6.7",
+    "sha256": "a7e8bcbec0e6f761b4af24f25677626b35f762f68eef79c08677a363212d11f6"
+  },
+  {
+    "file": "libssh-0.12.2.tar.xz",
+    "officialSource": "https://www.libssh.org/files/0.12/libssh-0.12.2.tar.xz",
+    "sha256": "49560f677d96e3706a904ac2de1116e25f3680937d51e5c92198fcba4a1c1e9f"
+  },
+  {
+    "file": "libssh2-1.11.1.tar.gz",
+    "officialSource": "https://www.libssh2.org/download/libssh2-1.11.1.tar.gz",
+    "sha256": "d9ec76cbe34db98eec3539fe2c899d26b0c837cb3eb466a56b0f109cabf658f7"
+  }
+]

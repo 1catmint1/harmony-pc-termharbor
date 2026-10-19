@@ -1,8 +1,11 @@
-import type { ImportedProfile, KnownHostEntry, KnownHostMatch, MacroOptions, MacroStepResult, ProxyOptions, SerialConnectionOptions, SessionPumpResult, SshConnectionOptions, SshConnectionResult, SshFileTransferOptions, SshFileTransferResult, SshPortForwardOptions, SshPortForwardStartResult, TerminalSnapshot } from '../model/TerminalTypes';
+import type { LocalExperienceInfo, ImportedProfile, KnownHostEntry, KnownHostMatch, MacroOptions, MacroStepResult, ProxyOptions, SerialConnectionOptions, SessionPumpResult, SshConnectionOptions, SshConnectionResult, SshFileTransferOptions, SshFileTransferResult, SshPortForwardOptions, SshPortForwardStartResult, TerminalSnapshot } from '../model/TerminalTypes';
 
 import terminalNative from 'libteraterm_ohos.so';
 
 interface NativeTerminalModule {
+  startLocalExperience(): LocalExperienceInfo;
+  stopLocalExperience(): LocalExperienceInfo;
+  localExperienceStatus(): LocalExperienceInfo;
   createSession(rows: number, cols: number): number;
   writeSession(id: number, text: string): void;
   connectTcpSession(id: number, host: string, port: number, timeoutMs?: number): void;
@@ -39,6 +42,9 @@ interface NativeTerminalModule {
 const nativeModule = terminalNative as NativeTerminalModule;
 
 export class TerminalNative {
+  static startLocalExperience(): LocalExperienceInfo { return nativeModule.startLocalExperience(); }
+  static stopLocalExperience(): LocalExperienceInfo { return nativeModule.stopLocalExperience(); }
+  static localExperienceStatus(): LocalExperienceInfo { return nativeModule.localExperienceStatus(); }
   static createSession(rows: number, cols: number): number {
     return nativeModule.createSession(rows, cols);
   }

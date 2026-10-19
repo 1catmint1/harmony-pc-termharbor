@@ -99,6 +99,7 @@ interface TerminalTabRecord {
 @Component
 struct Index {
   @State private helpNoticeText: string = PRIVACY_NOTICE;
+  @State private localExperienceText: string = '无需外部账号，可体验连接与文件传输';
   @State private tabs: TerminalTabRecord[] = [];
   @State private activeTabIndex: number = -1;
   @State private protocol: ProtocolMode = 'telnet';
@@ -175,6 +176,74 @@ struct Index {
   @State private toolsVisible: boolean = false;
   @State private activeToolsPanel: string = '';
 
+  private inputControllers: Map<string, TextInputController> = new Map();
+  private areaControllers: Map<string, TextAreaController> = new Map();
+  private leftControlDown: boolean = false;
+  private rightControlDown: boolean = false;
+
+  private inputController(name: string): TextInputController {
+    let controller = this.inputControllers.get(name);
+    if (controller === undefined) {
+      controller = new TextInputController();
+      this.inputControllers.set(name, controller);
+    }
+    return controller;
+  }
+
+  private areaController(name: string): TextAreaController {
+    let controller = this.areaControllers.get(name);
+    if (controller === undefined) {
+      controller = new TextAreaController();
+      this.areaControllers.set(name, controller);
+    }
+    return controller;
+  }
+
+  private resetShortcutModifiers(): void {
+    this.leftControlDown = false;
+    this.rightControlDown = false;
+  }
+
+  private rememberShortcutModifiers(event: KeyEvent): void {
+    if (event.keyCode === 2072) {
+      this.leftControlDown = event.type !== KeyType.Up;
+    } else if (event.keyCode === 2073) {
+      this.rightControlDown = event.type !== KeyType.Up;
+    }
+  }
+
+  private handleTextShortcut(event: KeyEvent, name: string, text: string, area: boolean): boolean {
+    this.rememberShortcutModifiers(event);
+    if (event.type !== KeyType.Down || event.keyCode !== 2017 || !this.modifierPressed(event, 'ctrl')) {
+      return false;
+    }
+    if (area) {
+      this.areaController(name).setTextSelection(0, text.length);
+    } else {
+      this.inputController(name).setTextSelection(0, text.length);
+    }
+    event.stopPropagation();
+    return true;
+  }
+
+  private selectAllTerminalOutput(): void {
+    const lines = this.terminalLines();
+    let lastLine = lines.length - 1;
+    while (lastLine >= 0 && lines[lastLine].trim().length === 0) {
+      lastLine--;
+    }
+    if (lastLine < 0) {
+      this.status = 'Terminal output is empty';
+      return;
+    }
+    this.selectionStartLine = 0;
+    this.selectionStartCol = 0;
+    this.selectionEndLine = lastLine;
+    this.selectionEndCol = Math.max(0, lines[lastLine].length - 1);
+    this.status = `Selected all terminal output (${lastLine + 1} lines)`;
+    this.saveActiveTab();
+  }
+
   private sessionId: number = 0;
   private timerId: number = 0;
   private sessionLogs: Map<number, SessionLogBuffer> = new Map();
@@ -188,6 +257,7 @@ struct Index {
   }
 
   aboutToDisappear() {
+    TerminalNative.stopLocalExperience();
     if (this.timerId !== 0) {
       clearInterval(this.timerId);
       this.timerId = 0;
@@ -658,6 +728,44 @@ struct Index {
     this.saveActiveTab();
   }
 
+  private startLocalExperience(protocol: ProtocolMode): void {
+    try {
+      const demo = TerminalNative.startLocalExperience();
+      this.createTab();
+      this.protocol = protocol;
+      this.host = demo.host;
+      this.port = `${protocol === 'ssh' ? demo.sshPort : demo.tcpPort}`;
+      this.proxyEnabled = false;
+      this.username = demo.username;
+      this.password = demo.password;
+      this.privateKeyPath = '';
+      this.publicKeyPath = '';
+      this.passphrase = '';
+      this.transferRemotePath = demo.remotePath;
+      this.transferLocalPath = SandboxTransferStore.localExperienceUpload(this.appContext());
+      this.forwardLocalHost = '127.0.0.1';
+      this.forwardLocalPort = '0';
+      this.forwardRemoteHost = demo.host;
+      this.forwardRemotePort = `${demo.tcpPort}`;
+      this.inputText = protocol === 'ssh' ? 'echo 你好，TermHarbor' : '你好，TermHarbor';
+      this.localExperienceText = '体验账号 local-demo / local-demo；文件 /hello.txt；发送 help 查看命令';
+      this.saveActiveTab();
+      this.connect();
+      const localIssue = TerminalNative.localExperienceStatus().error;
+      if (localIssue.length > 0) { this.localExperienceText = localIssue; }
+    } catch (error) { this.status = `${error}`; }
+  }
+
+  private stopLocalExperience(): void {
+    TerminalNative.stopLocalExperience();
+    this.localExperienceText = '本机体验已停止，内存文件已释放';
+  }
+
+  private showLocalExperienceCounts(): void {
+    const info = TerminalNative.localExperienceStatus();
+    this.localExperienceText = `TCP 回声 ${info.tcpEchoes}；SSH 登录 ${info.sshLogins}；SCP 传输 ${info.scpTransfers}；SFTP 读写 ${info.sftpRequests}`;
+  }
+
   private connect() {
     const profile = this.readProfile();
     if (!profile) {
@@ -751,14 +859,14 @@ struct Index {
   }
 
   private modifierPressed(event: KeyEvent, name: string): boolean {
+    if (name === 'ctrl' && (this.leftControlDown || this.rightControlDown)) {
+      return true;
+    }
     try {
-      if (event.getModifierKeyState !== undefined) {
-        return event.getModifierKeyState([name]);
-      }
+      return event.getModifierKeyState !== undefined && event.getModifierKeyState([name]);
     } catch (_error) {
       return false;
     }
-    return false;
   }
 
   private printableKeyText(event: KeyEvent): string {
@@ -855,10 +963,16 @@ struct Index {
   }
 
   private handleTerminalKeyEvent(event: KeyEvent): boolean {
+    this.rememberShortcutModifiers(event);
     if (event.type !== KeyType.Down) {
       return false;
     }
 
+    if (this.modifierPressed(event, 'ctrl') && event.keyCode === 2017) {
+      this.selectAllTerminalOutput();
+      event.stopPropagation();
+      return true;
+    }
     if (this.modifierPressed(event, 'ctrl') && event.keyCode === 2019 && this.selectionStartLine >= 0) {
       this.copySelection();
       return true;
@@ -877,10 +991,16 @@ struct Index {
   }
 
   private handleTerminalCaptureKeyEvent(event: KeyEvent): boolean {
+    this.rememberShortcutModifiers(event);
     if (event.type !== KeyType.Down) {
       return false;
     }
 
+    if (this.modifierPressed(event, 'ctrl') && event.keyCode === 2017) {
+      this.selectAllTerminalOutput();
+      event.stopPropagation();
+      return true;
+    }
     if (this.modifierPressed(event, 'ctrl') && event.keyCode === 2019 && this.selectionStartLine >= 0) {
       this.copySelection();
       return true;
@@ -1823,6 +1943,13 @@ struct Index {
 
   build() {
     Column() {
+      Row({ space: 8 }) {
+        Button('本机 TCP 体验').winCommandButton().onClick(() => this.startLocalExperience('tcp'))
+        Button('本机 SSH 体验').winCommandButton().onClick(() => this.startLocalExperience('ssh'))
+        Button('停止体验').winCommandButton().onClick(() => this.stopLocalExperience())
+        Button('体验统计').winCommandButton().onClick(() => this.showLocalExperienceCounts())
+        Text(this.localExperienceText).fontSize(12).layoutWeight(1)
+      }.width('100%').padding({ left: 14, right: 14, top: 4, bottom: 4 }).backgroundColor('#EAF2FA')
       Row() {
         Text('File')
           .fontSize(13)
@@ -1952,7 +2079,9 @@ struct Index {
           .backgroundColor(this.protocol === 'serial' ? '#DCEBFF' : '#F6F6F6')
           .borderRadius(0)
           .onClick(() => this.selectProtocol('serial'))
-        TextInput({ placeholder: this.hostPlaceholder(), text: this.host })
+        TextInput({ placeholder: this.hostPlaceholder(), text: this.host, controller: this.inputController('host') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'host', this.host, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
           .onChange((value: string) => {
             this.host = value;
@@ -1963,7 +2092,9 @@ struct Index {
             this.connect();
           })
           .layoutWeight(1)
-        TextInput({ placeholder: this.portPlaceholder(), text: this.port })
+        TextInput({ placeholder: this.portPlaceholder(), text: this.port, controller: this.inputController('port') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'port', this.port, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
           .type(InputType.Number)
           .onChange((value: string) => {
@@ -2065,7 +2196,9 @@ struct Index {
             }
             this.saveActiveTab();
           })
-        TextInput({ placeholder: 'Proxy host', text: this.proxyHost })
+        TextInput({ placeholder: 'Proxy host', text: this.proxyHost, controller: this.inputController('proxyHost') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'proxyHost', this.proxyHost, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
           .enabled(this.proxyEnabled)
           .onChange((value: string) => {
@@ -2073,7 +2206,9 @@ struct Index {
             this.saveActiveTab();
           })
           .layoutWeight(1)
-        TextInput({ placeholder: 'Proxy port', text: this.proxyPort })
+        TextInput({ placeholder: 'Proxy port', text: this.proxyPort, controller: this.inputController('proxyPort') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'proxyPort', this.proxyPort, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
           .enabled(this.proxyEnabled)
           .type(InputType.Number)
@@ -2082,7 +2217,9 @@ struct Index {
             this.saveActiveTab();
           })
           .width(110)
-        TextInput({ placeholder: 'Proxy user', text: this.proxyUsername })
+        TextInput({ placeholder: 'Proxy user', text: this.proxyUsername, controller: this.inputController('proxyUsername') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'proxyUsername', this.proxyUsername, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
           .enabled(this.proxyEnabled)
           .onChange((value: string) => {
@@ -2090,7 +2227,9 @@ struct Index {
             this.saveActiveTab();
           })
           .width(160)
-        TextInput({ placeholder: 'Proxy password', text: this.proxyPassword })
+        TextInput({ placeholder: 'Proxy password', text: this.proxyPassword, controller: this.inputController('proxyPassword') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'proxyPassword', this.proxyPassword, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
           .enabled(this.proxyEnabled)
           .type(InputType.Password)
@@ -2229,14 +2368,18 @@ struct Index {
 
       if (this.toolsVisible && (this.activeToolsPanel === 'connection' || this.activeToolsPanel === 'setup') && this.protocol === 'ssh') {
         Row() {
-          TextInput({ placeholder: 'User', text: this.username })
+          TextInput({ placeholder: 'User', text: this.username, controller: this.inputController('username') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'username', this.username, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
             .onChange((value: string) => {
               this.username = value;
               this.saveActiveTab();
             })
             .width(180)
-          TextInput({ placeholder: 'Password', text: this.password })
+          TextInput({ placeholder: 'Password', text: this.password, controller: this.inputController('password') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'password', this.password, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
             .type(InputType.Password)
             .onChange((value: string) => {
@@ -2244,7 +2387,9 @@ struct Index {
               this.saveActiveTab();
             })
             .width(220)
-          TextInput({ placeholder: 'Private key path', text: this.privateKeyPath })
+          TextInput({ placeholder: 'Private key path', text: this.privateKeyPath, controller: this.inputController('privateKeyPath') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'privateKeyPath', this.privateKeyPath, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
             .onChange((value: string) => {
               this.privateKeyPath = value;
@@ -2259,14 +2404,18 @@ struct Index {
             .onClick(() => {
               this.pickPrivateKey();
             })
-          TextInput({ placeholder: 'Public key path', text: this.publicKeyPath })
+          TextInput({ placeholder: 'Public key path', text: this.publicKeyPath, controller: this.inputController('publicKeyPath') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'publicKeyPath', this.publicKeyPath, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
             .onChange((value: string) => {
               this.publicKeyPath = value;
               this.saveActiveTab();
             })
             .width(220)
-          TextInput({ placeholder: 'Passphrase', text: this.passphrase })
+          TextInput({ placeholder: 'Passphrase', text: this.passphrase, controller: this.inputController('passphrase') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'passphrase', this.passphrase, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
             .type(InputType.Password)
             .onChange((value: string) => {
@@ -2289,7 +2438,9 @@ struct Index {
             .onClick(() => {
               this.knownHostPolicy = this.knownHostPolicy === 'strict' ? 'accept_new' : 'strict';
             })
-          TextArea({ placeholder: 'known_hosts', text: this.knownHostsText })
+          TextArea({ placeholder: 'known_hosts', text: this.knownHostsText, controller: this.areaController('knownHostsText') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'knownHostsText', this.knownHostsText, true))
+          .onBlur(() => this.resetShortcutModifiers())
                 .winTextArea()
             .onChange((value: string) => {
               this.knownHostsText = value;
@@ -2313,7 +2464,9 @@ struct Index {
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .width(180)
-          TextInput({ placeholder: 'Local path', text: this.transferLocalPath })
+          TextInput({ placeholder: 'Local path', text: this.transferLocalPath, controller: this.inputController('transferLocalPath') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'transferLocalPath', this.transferLocalPath, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
             .onChange((value: string) => {
               this.transferLocalPath = value;
@@ -2325,7 +2478,9 @@ struct Index {
             .onClick(() => {
               this.pickTransferFile();
             })
-          TextInput({ placeholder: 'Remote path', text: this.transferRemotePath })
+          TextInput({ placeholder: 'Remote path', text: this.transferRemotePath, controller: this.inputController('transferRemotePath') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'transferRemotePath', this.transferRemotePath, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
             .onChange((value: string) => {
               this.transferRemotePath = value;
@@ -2360,14 +2515,18 @@ struct Index {
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .width(180)
-          TextInput({ placeholder: 'Local host', text: this.forwardLocalHost })
+          TextInput({ placeholder: 'Local host', text: this.forwardLocalHost, controller: this.inputController('forwardLocalHost') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'forwardLocalHost', this.forwardLocalHost, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
             .onChange((value: string) => {
               this.forwardLocalHost = value;
               this.saveActiveTab();
             })
             .width(160)
-          TextInput({ placeholder: 'Local port', text: this.forwardLocalPort })
+          TextInput({ placeholder: 'Local port', text: this.forwardLocalPort, controller: this.inputController('forwardLocalPort') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'forwardLocalPort', this.forwardLocalPort, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
             .type(InputType.Number)
             .onChange((value: string) => {
@@ -2375,14 +2534,18 @@ struct Index {
               this.saveActiveTab();
             })
             .width(120)
-          TextInput({ placeholder: 'Remote host', text: this.forwardRemoteHost })
+          TextInput({ placeholder: 'Remote host', text: this.forwardRemoteHost, controller: this.inputController('forwardRemoteHost') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'forwardRemoteHost', this.forwardRemoteHost, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
             .onChange((value: string) => {
               this.forwardRemoteHost = value;
               this.saveActiveTab();
             })
             .layoutWeight(1)
-          TextInput({ placeholder: 'Remote port', text: this.forwardRemotePort })
+          TextInput({ placeholder: 'Remote port', text: this.forwardRemotePort, controller: this.inputController('forwardRemotePort') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'forwardRemotePort', this.forwardRemotePort, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
             .type(InputType.Number)
             .onChange((value: string) => {
@@ -2453,7 +2616,9 @@ struct Index {
           Column() {
           if (this.activeToolsPanel === 'file') {
             Row() {
-              TextArea({ placeholder: 'TERATERM.INI [Hosts]', text: this.iniImportText })
+              TextArea({ placeholder: 'TERATERM.INI [Hosts]', text: this.iniImportText, controller: this.areaController('iniImportText') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'iniImportText', this.iniImportText, true))
+          .onBlur(() => this.resetShortcutModifiers())
                 .winTextArea()
                 .onChange((value: string) => {
                   this.iniImportText = value;
@@ -2507,7 +2672,9 @@ struct Index {
                 .maxLines(1)
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                 .width(220)
-              TextArea({ placeholder: 'TTL macro', text: this.macroScript })
+              TextArea({ placeholder: 'TTL macro', text: this.macroScript, controller: this.areaController('macroScript') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'macroScript', this.macroScript, true))
+          .onBlur(() => this.resetShortcutModifiers())
                 .winTextArea()
                 .onChange((value: string) => {
                   this.macroScript = value;
@@ -2554,7 +2721,9 @@ struct Index {
                 .maxLines(4)
                 .width('100%')
               if (this.macroDialogType === 'inputbox') {
-                TextInput({ placeholder: 'Input', text: this.macroDialogValue })
+                TextInput({ placeholder: 'Input', text: this.macroDialogValue, controller: this.inputController('macroDialogValue') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'macroDialogValue', this.macroDialogValue, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
                   .onChange((value: string) => {
                     this.macroDialogValue = value;
@@ -2562,7 +2731,9 @@ struct Index {
                   .width('100%')
               }
               if (this.macroDialogType === 'passwordbox') {
-                TextInput({ placeholder: 'Password', text: this.macroDialogValue })
+                TextInput({ placeholder: 'Password', text: this.macroDialogValue, controller: this.inputController('macroDialogValue') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'macroDialogValue', this.macroDialogValue, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
                   .type(InputType.Password)
                   .onChange((value: string) => {
@@ -2574,8 +2745,9 @@ struct Index {
                 TextInput({
                   placeholder: this.macroDialogType === 'dirnamebox' ? 'Folder path' :
                     (this.macroDialogSave ? 'Save file path' : 'Open file path'),
-                  text: this.macroDialogValue
-                })
+                  text: this.macroDialogValue, controller: this.inputController('macroDialogValue') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'macroDialogValue', this.macroDialogValue, false))
+          .onBlur(() => this.resetShortcutModifiers())
                   .winTextInput()
                   .onChange((value: string) => {
                     this.macroDialogValue = value;
@@ -2655,7 +2827,9 @@ struct Index {
                 .maxLines(1)
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                 .width(160)
-              TextInput({ placeholder: 'Search output', text: this.searchText })
+              TextInput({ placeholder: 'Search output', text: this.searchText, controller: this.inputController('searchText') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'searchText', this.searchText, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
                 .onChange((value: string) => {
                   this.searchText = value;
@@ -2729,7 +2903,7 @@ struct Index {
 
           if (this.activeToolsPanel === 'help') {
             Row() {
-              Text(`TermHarbor 1.0.1  |  ${this.status}`)
+              Text(`TermHarbor 1.0.2  |  ${this.status}`)
                 .fontSize(12)
                 .fontColor('#333333')
                 .maxLines(1)
@@ -2808,7 +2982,8 @@ struct Index {
           this.terminalKeyCaptureText = '';
           this.sendTerminalKeyboardPayload('\r');
         })
-        .onKeyEvent((event: KeyEvent): boolean => this.handleTerminalCaptureKeyEvent(event))
+        .onKeyPreIme((event: KeyEvent): boolean => this.handleTerminalCaptureKeyEvent(event))
+        .onBlur(() => this.resetShortcutModifiers())
 
       Row() {
         Text(this.status)
@@ -2817,7 +2992,9 @@ struct Index {
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width(220)
-        TextInput({ placeholder: 'Input', text: this.inputText })
+        TextInput({ placeholder: 'Input', text: this.inputText, controller: this.inputController('inputText') })
+          .onKeyPreIme((event: KeyEvent): boolean => this.handleTextShortcut(event, 'inputText', this.inputText, false))
+          .onBlur(() => this.resetShortcutModifiers())
           .winTextInput()
           .onChange((value: string) => {
             this.inputText = value;
