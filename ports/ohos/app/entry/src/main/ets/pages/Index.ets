@@ -99,7 +99,7 @@ interface TerminalTabRecord {
 @Component
 struct Index {
   @State private helpNoticeText: string = PRIVACY_NOTICE;
-  @State private localExperienceText: string = '无需外部账号，可体验连接与文件传输';
+  @State private localExperienceText: string = '选择体验后自动连接本机服务；无需注册或配置外部服务器。';
   @State private tabs: TerminalTabRecord[] = [];
   @State private activeTabIndex: number = -1;
   @State private protocol: ProtocolMode = 'telnet';
@@ -747,13 +747,31 @@ struct Index {
       this.forwardLocalPort = '0';
       this.forwardRemoteHost = demo.host;
       this.forwardRemotePort = `${demo.tcpPort}`;
-      this.inputText = protocol === 'ssh' ? 'echo 你好，TermHarbor' : '你好，TermHarbor';
+      this.inputText = protocol === 'ssh' ? 'echo 你好，泊舟连接台' : '你好，泊舟连接台';
       this.localExperienceText = '体验账号 local-demo / local-demo；文件 /hello.txt；发送 help 查看命令';
       this.saveActiveTab();
       this.connect();
+      this.toolsVisible = false;
+      this.activeToolsPanel = '';
       const localIssue = TerminalNative.localExperienceStatus().error;
       if (localIssue.length > 0) { this.localExperienceText = localIssue; }
     } catch (error) { this.status = `${error}`; }
+  }
+
+  private startLocalFileExperience(): void {
+    this.startLocalExperience('ssh');
+    if (this.status.startsWith('SSH connected')) {
+      this.toolsVisible = true;
+      this.activeToolsPanel = 'file';
+      this.localExperienceText = '已连接本机 SSH；点击 SCP Get/Put 或 SFTP Get/Put 即可传输，账号与路径已填好。';
+    }
+  }
+
+  private prepareOwnConnection(): void {
+    this.createTab();
+    this.toolsVisible = true;
+    this.activeToolsPanel = 'connection';
+    this.localExperienceText = '输入你自己的主机与端口；SSH 账号在下方工具区配置。本机体验仍可随时使用。';
   }
 
   private stopLocalExperience(): void {
@@ -1943,13 +1961,28 @@ struct Index {
 
   build() {
     Column() {
-      Row({ space: 8 }) {
-        Button('本机 TCP 体验').winCommandButton().onClick(() => this.startLocalExperience('tcp'))
-        Button('本机 SSH 体验').winCommandButton().onClick(() => this.startLocalExperience('ssh'))
-        Button('停止体验').winCommandButton().onClick(() => this.stopLocalExperience())
-        Button('体验统计').winCommandButton().onClick(() => this.showLocalExperienceCounts())
-        Text(this.localExperienceText).fontSize(12).layoutWeight(1)
-      }.width('100%').padding({ left: 14, right: 14, top: 4, bottom: 4 }).backgroundColor('#EAF2FA')
+      Column({ space: 6 }) {
+        Row({ space: 12 }) {
+          Text('泊舟连接台').fontSize(20).fontWeight(FontWeight.Bold).fontColor('#16464B')
+          Text('本机连接体验').fontSize(14).fontColor('#235E63')
+          Blank()
+          Button('停止体验').winCommandButton().onClick(() => this.stopLocalExperience())
+          Button('体验统计').winCommandButton().onClick(() => this.showLocalExperienceCounts())
+        }.width('100%')
+        Text('无需注册、外部服务器或配置账号。选择 TCP、SSH 或文件传输，应用会自动填写参数并连接本机服务。')
+          .fontSize(13).fontColor('#235E63').width('100%')
+        Row({ space: 10 }) {
+          Button('TCP 回声体验').winCommandButton().height(36).id('experience-tcp')
+            .onClick(() => this.startLocalExperience('tcp'))
+          Button('SSH 终端体验').winCommandButton().height(36).id('experience-ssh')
+            .onClick(() => this.startLocalExperience('ssh'))
+          Button('文件传输体验').winCommandButton().height(36).backgroundColor('#106E7A').fontColor('#FFFFFF')
+            .id('experience-files').onClick(() => this.startLocalFileExperience())
+          Button('连接自己的服务器').winCommandButton().height(36)
+            .onClick(() => this.prepareOwnConnection())
+        }.width('100%')
+        Text(this.localExperienceText).fontSize(12).fontColor('#16464B').width('100%')
+      }.width('100%').padding({ left: 14, right: 14, top: 8, bottom: 8 }).backgroundColor('#E5F4F1')
       Row() {
         Text('File')
           .fontSize(13)
@@ -2122,7 +2155,7 @@ struct Index {
           .backgroundColor('#F6F6F6')
           .borderRadius(0)
           .onClick(() => this.disconnect())
-        Button(this.toolsVisible ? 'Hide Tools' : 'Tools', { type: ButtonType.Normal, stateEffect: false })
+        Button(this.toolsVisible ? '收起工具 / Tools' : '工具 / Tools', { type: ButtonType.Normal, stateEffect: false })
           .winCommandButton()
           .height(34)
           .fontSize(13)
@@ -2903,7 +2936,7 @@ struct Index {
 
           if (this.activeToolsPanel === 'help') {
             Row() {
-              Text(`TermHarbor 1.0.2  |  ${this.status}`)
+              Text(`泊舟连接台 1.0.3  |  ${this.status}`)
                 .fontSize(12)
                 .fontColor('#333333')
                 .maxLines(1)

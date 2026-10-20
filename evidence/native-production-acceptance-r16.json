@@ -1,0 +1,46 @@
+{
+  "product": "泊舟连接台",
+  "previousProduct": "TermHarbor",
+  "bundle": "com.termharbor.track1",
+  "version": "1.0.3",
+  "run": "r16",
+  "complete": true,
+  "scope": "Bound USB app; real TCP, SSH, SCP and SFTP through loopback server",
+  "checks": {
+    "startupConnectionGuidance": true,
+    "tcpChineseRoundtrip": true,
+    "sshChineseRoundtrip": true,
+    "fileEntryAutofilledAndConnected": true,
+    "scpDownload": true,
+    "scpUpload": true,
+    "sftpDownload": true,
+    "sftpUpload": true,
+    "ownServerIndependentEntry": true,
+    "firstStopResponsive": true,
+    "restartAfterStop": true,
+    "secondStopAndVersionCorrect": true,
+    "privacyAccess": true,
+    "originalLicenseRetained": true,
+    "ownedProcessesReleased": true
+  },
+  "observedServerCounters": {
+    "tcpEchoes": 1,
+    "sshLogins": 7,
+    "scpAcknowledgedTransfers": 2,
+    "sftpReadWriteRequests": 3
+  },
+  "transferSampleBytes": 111,
+  "hostEntryCases": 10,
+  "sameBootPidUidBound": true,
+  "hapSha256": "d861b1b6380d3a7a89db939b524e973573d2b64543d0936bafff232c39e0824e",
+  "sourceHashes": {
+    "ports/ohos/app/entry/src/main/ets/pages/Index.ets": "cb13dfc278f45cebb9e6926032bd9505e00930680207cff21d1ac78990bab70f",
+    "ports/ohos/native/src/local_experience.cpp": "c8b8458a1c452ebd35ed69eea161254279543a22159f25001afa3dadc79c24b2",
+    "ports/ohos/app/AppScope/app.json5": "143826f3d4a8ff446be7f4f7a48b1203d1d13ffe27224e0d4cc3d58dba1ce3a4",
+    "ports/ohos/app/AppScope/resources/base/element/string.json": "1686046fceacbc57267ea68c6628a980b460b722af37b018536f167890beb45d",
+    "ports/ohos/app/entry/src/main/resources/base/element/string.json": "82a00c8a4d54081c9e70de7c92f3e351b02d6896d516f0333c0af4addd2e8fe9",
+    "ports/ohos/app/AppScope/resources/base/media/app_icon.png": "b5017eea5eac998fb37f1dade752b59959da14c5f5e009f0be67bdad88164602"
+  },
+  "previousCandidate": "r15 preserved separately; corrected stale Help version label",
+  "at": "2026-10-20T10:26:10.864005+00:00"
+}

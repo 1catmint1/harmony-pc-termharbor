@@ -1,4 +1,4 @@
-TermHarbor
+泊舟连接台
 Based on the Tera Term OpenHarmony community port. Existing terminal, transport and UI work retains its original authorship.
 
 Copyright (C) 1994-1998 T. Teranishi

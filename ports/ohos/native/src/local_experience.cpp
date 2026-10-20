@@ -43,7 +43,7 @@ class Experience {
     stop();
     note("");
     files.clear();
-    files["hello.txt"] = "TermHarbor 本机连接体验\n真实 TCP / SSH / SCP / SFTP。\n本文件仅位于体验服务内存中。\n";
+    files["hello.txt"] = "泊舟连接台 本机连接体验\n真实 TCP / SSH / SCP / SFTP。\n本文件仅位于体验服务内存中。\n";
     tcpEchoes=0; sshLogins=0; fileReads=0; fileWrites=0;scpTransfers=0;sftpRequests=0;
     try {
       if (ssh_init()!=SSH_OK || ssh_pki_generate(SSH_KEYTYPE_ECDSA_P256,256,&key)!=SSH_OK)
@@ -117,7 +117,7 @@ class Experience {
       int fd=accept(tcp,nullptr,nullptr);if(fd<0)continue;
       if(!capacity()||!track(fd)){close(fd);continue;}
       addWorker(std::thread([this,fd]{
-        const std::string banner="TermHarbor 本机 TCP 回声服务\r\n输入文字并发送，即可查看真实网络往返。\r\n";
+        const std::string banner="泊舟连接台 本机 TCP 回声服务\r\n输入文字并发送，即可查看真实网络往返。\r\n";
         send(fd,banner.data(),banner.size(),MSG_NOSIGNAL);
         char buf[4096];
         while(live()){
@@ -166,7 +166,7 @@ class Experience {
     return "Local workspace command not supported; type help.\r\n";
   }
   void shell(ssh_channel c){
-    if(!write(c,"TermHarbor 本机 SSH 体验（仅内存工作区）\r\n"+command("help")+"local-demo> "))return;
+    if(!write(c,"泊舟连接台 本机 SSH 体验（仅内存工作区）\r\n"+command("help")+"local-demo> "))return;
     std::string line;char b[1024];
     while(live()&&ssh_channel_is_open(c)&&!ssh_channel_is_eof(c)){
       int n=ssh_channel_read_timeout(c,b,sizeof(b),0,200);if(n==SSH_AGAIN)continue;if(n<0){note(std::string("SSH read: ")+ssh_get_error(ssh_channel_get_session(c)));break;}if(n==0)continue;
@@ -267,7 +267,7 @@ class Experience {
   }
 
   void handleSsh(ssh_session session){
-    if(ssh_handle_key_exchange(session)!=SSH_OK){note(std::string("SSH key exchange: ")+ssh_get_error(session));OH_LOG_Print(LOG_APP,LOG_ERROR,0x1234,"TermHarbor","Local SSH key exchange: %{public}s",ssh_get_error(session));return;}
+    if(ssh_handle_key_exchange(session)!=SSH_OK){note(std::string("SSH key exchange: ")+ssh_get_error(session));OH_LOG_Print(LOG_APP,LOG_ERROR,0x1234,"泊舟连接台","Local SSH key exchange: %{public}s",ssh_get_error(session));return;}
     bool authenticated=false;unsigned tries=0;ssh_channel channel=nullptr;
     while(live()&&tries<8){
       ssh_message msg=ssh_message_get(session);
@@ -276,7 +276,7 @@ class Experience {
         // A message wait timeout does not mean that the SSH peer disconnected.
         if(live()&&ssh_is_connected(session)&&ssh_get_error_code(session)==SSH_NO_ERROR)continue;
         note(std::string("SSH request: ")+ssh_get_error(session));
-        OH_LOG_Print(LOG_APP,LOG_ERROR,0x1234,"TermHarbor","Local SSH request: %{public}s",ssh_get_error(session));break;
+        OH_LOG_Print(LOG_APP,LOG_ERROR,0x1234,"泊舟连接台","Local SSH request: %{public}s",ssh_get_error(session));break;
       }
       int type=ssh_message_type(msg),subtype=ssh_message_subtype(msg);
       bool handled=false,serveShell=false,serveSftp=false,serveForward=false;std::string exec;

@@ -2,11 +2,11 @@
   "string": [
     {
       "name": "app_name",
-      "value": "TermHarbor"
+      "value": "泊舟连接台"
     },
     {
       "name": "entry_desc",
-      "value": "Tera Term terminal for HarmonyOS PC"
+      "value": "泊舟连接台：终端连接与文件传输工作台"
     }
   ]
 }

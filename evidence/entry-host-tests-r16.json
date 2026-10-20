@@ -1,0 +1,50 @@
+{
+  "suite": "Production ArkTS local connection entry behavior",
+  "total": 10,
+  "passed": 10,
+  "skipped": 0,
+  "cases": [
+    {
+      "name": "TCP demo connects loopback with actual runtime port and no proxy",
+      "pass": true
+    },
+    {
+      "name": "SSH demo fills the published local account and clears prior key credentials",
+      "pass": true
+    },
+    {
+      "name": "Demo file paths are ready for private-directory transfer",
+      "pass": true
+    },
+    {
+      "name": "Terminal demo closes stale tool panels",
+      "pass": true
+    },
+    {
+      "name": "File experience connects then opens the populated File tools",
+      "pass": true
+    },
+    {
+      "name": "Failed SSH authentication does not present transfer tools as ready",
+      "pass": true
+    },
+    {
+      "name": "Listener startup failure reports an error without attempting a connection",
+      "pass": true
+    },
+    {
+      "name": "Runtime issue is visible after a connection attempt",
+      "pass": true
+    },
+    {
+      "name": "Own-server entry creates a separate configuration tab without connecting",
+      "pass": true
+    },
+    {
+      "name": "Stopping the demo releases the runtime and explains the state",
+      "pass": true
+    }
+  ],
+  "sourceSha256": "cb13dfc278f45cebb9e6926032bd9505e00930680207cff21d1ac78990bab70f",
+  "scope": "Host behavior; real sockets, SSH and transfer require bound USB evidence"
+}
